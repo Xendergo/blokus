@@ -6,8 +6,8 @@ const app = express();
 
 app.use("/", express.static(__dirname + '/public'));
 
-const server = app.listen(3000);
-console.log("Listening on port 3000");
+const server = app.listen(4000);
+console.log("Listening on port 4000");
 
 const wsServer = new ws.Server({
   server: server,
@@ -28,10 +28,15 @@ wsServer.on("connection", (socket) => {
    */
   let player;
   let room;
+  let roomId;
 
   socket.on("close", () => {
     if (room) {
-      room.players.remove(player.id);
+      room.players.delete(player.id);
+
+      if (room.players.size === 0) {
+        rooms.delete(roomId);
+      }
     }
   });
 
@@ -51,6 +56,8 @@ wsServer.on("connection", (socket) => {
         room = rooms.get(data.id);
         player = new Player(null, socket, room.players.size % 2 === 1);
         room.players.set(player.id, player);
+
+        roomId = data.id;
 
         socket.send(JSON.stringify({
           msg: "JoinedRoom"
@@ -77,6 +84,8 @@ wsServer.on("connection", (socket) => {
         room = rooms.get(data.id);
         player = new Player(null, socket, room.players.size % 2 === 1);
         room.players.set(player.id, player);
+
+        roomId = data.id;
 
         socket.send(JSON.stringify({
           msg: "JoinedRoom"

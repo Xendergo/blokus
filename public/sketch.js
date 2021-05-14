@@ -108,6 +108,8 @@ function rerenderBoard() {
 function onClick(clickX, clickY) {
   if (!isValidPosition(clickX, clickY)) return;
 
+  firstMove = false;
+
   const polymino = polyminos[selectedPolymino];
 
   availablePolyminos[selectedPolymino] = false;

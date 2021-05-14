@@ -21,8 +21,8 @@ button:hover {
 }
 
 .tile {
-  aspect-ratio: 1;
   width: 3vh;
+  height: 3vh;
   border: 2px solid black;
   display: inline-block;
   background-color: #303030;
