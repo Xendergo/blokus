@@ -1,0 +1,38 @@
+* {
+  background-color: black;
+  font-size: 1.5rem;
+  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+button,
+input {
+  background-color: transparent;
+  border: 2px solid white;
+  padding: 8px;
+  margin: 8px;
+  border-radius: 4px;
+  transition-duration: 0.2s;
+}
+
+button:hover {
+  cursor: pointer;
+  background-color: rgba(0, 83, 161, 0.685);
+}
+
+.tile {
+  aspect-ratio: 1;
+  width: 3vh;
+  border: 2px solid black;
+  display: inline-block;
+  background-color: #303030;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
