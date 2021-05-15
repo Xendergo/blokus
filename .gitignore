@@ -74,3 +74,5 @@ typings/
 
 # FuseBox cache
 .fusebox/
+
+Tor-Service/

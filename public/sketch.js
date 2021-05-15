@@ -9,6 +9,8 @@ let firstMove = true;
 
 let inGame = false;
 
+const snap = new Audio("snap.mp3");
+
 ws.onmessage = (msg) => {
   const data = JSON.parse(msg.data);
   if (data.msg === "error") {
@@ -63,6 +65,8 @@ function colorChoice(choice) {
     color: choice
   }));
 
+  inGame = true;
+
   for (let i = 0; i < 20; i++) {
     const elts = [];
     const boardSpots = [];
@@ -89,6 +93,11 @@ function colorChoice(choice) {
 function setBoardSpot(x, y, color) {
   board[x][y] = color;
   boardElts[x][y][0].style.backgroundColor = colors[color];
+  boardElts[x][y][0].style.animation = "tileChanged 0.4s linear";
+
+  snap.play();
+  $("#mostRecentColor").html(`Most recent color: ${names[color]}`);
+
   previewStatusChanged();
 }
 

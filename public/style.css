@@ -36,3 +36,13 @@ button:hover {
   display: flex;
   flex-direction: column;
 }
+
+@keyframes tileChanged {
+  0% {
+    filter: invert(100%) blur(8px);
+  }
+
+  100% {
+    filter: none;
+  }
+}

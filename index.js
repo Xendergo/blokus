@@ -6,8 +6,9 @@ const app = express();
 
 app.use("/", express.static(__dirname + '/public'));
 
-const server = app.listen(4000);
-console.log("Listening on port 4000");
+const port = 3000;
+const server = app.listen(port);
+console.log("Listening on port " + port);
 
 const wsServer = new ws.Server({
   server: server,
