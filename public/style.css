@@ -28,6 +28,11 @@ button:hover {
   background-color: #303030;
 }
 
+.gameWrapper {
+  display: flex;
+  align-items: flex-start;
+}
+
 .flex {
   display: flex;
 }
@@ -45,4 +50,9 @@ button:hover {
   100% {
     filter: none;
   }
+}
+
+.board {
+  display: grid;
+  grid-gap: 1px;
 }

@@ -71,17 +71,17 @@ function colorChoice(choice) {
     const elts = [];
     const boardSpots = [];
 
-    const flexbox = $("<div class='flex'></div>");
-
     for (let j = 0; j < 20; j++) {
       const elt = $(`<span class='tile' onclick='onClick(${i}, ${j})' onmouseenter='onHover(${i}, ${j})'></span>`);
-      flexbox.append(elt);
       elts.push(elt);
       boardSpots.push(-1);
+
+      elt[0].style.gridColumnStart = j + 1;
+      elt[0].style.gridRowStart = i + 1;
+
+      $("#board").append(elt);
     }
 
-    $("#board").append(flexbox);
-    $("#board").append("<br>");
 
     boardElts.push(elts);
     board.push(boardSpots);
