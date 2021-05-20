@@ -4,6 +4,12 @@ class Room {
     this.sockets = [];
     this.boardChanges = [];
     this.colors = [0, 1, 2, 3];
+    this.availablePieces = [
+      [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
+      [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
+      [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
+      [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
+    ];
   }
 }
 

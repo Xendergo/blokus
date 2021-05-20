@@ -1,4 +1,4 @@
-const availablePolyminos = [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true];
+let availablePolyminos = [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true];
 const polyminos = [
   [
     1,

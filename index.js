@@ -41,6 +41,17 @@ wsServer.on("connection", (socket) => {
     }
   });
 
+  function sendRoomInfo() {
+    socket.send(JSON.stringify({
+      msg: "JoinedRoom"
+    }));
+
+    socket.send(JSON.stringify({
+      msg: "colors",
+      colors: room.colors.filter((c) => !Array.from(room.players.values()).reduce((a, v) => a || v.color === c, false))
+    }));
+  }
+
   socket.on("message", (dataJson) => {
     const data = JSON.parse(dataJson);
     switch (data.msg) {
@@ -60,14 +71,7 @@ wsServer.on("connection", (socket) => {
 
         roomId = data.id;
 
-        socket.send(JSON.stringify({
-          msg: "JoinedRoom"
-        }));
-
-        socket.send(JSON.stringify({
-          msg: "colors",
-          colors: room.colors.filter((c) => !Array.from(room.players.values()).reduce((a, v) => a || v.color === c, false))
-        }));
+        sendRoomInfo();
 
         break;
 
@@ -88,14 +92,7 @@ wsServer.on("connection", (socket) => {
 
         roomId = data.id;
 
-        socket.send(JSON.stringify({
-          msg: "JoinedRoom"
-        }));
-
-        socket.send(JSON.stringify({
-          msg: "colors",
-          colors: room.colors.filter((c) => !Array.from(room.players.values()).reduce((a, v) => a || v.color === c, false))
-        }));
+        sendRoomInfo();
 
         break;
 
@@ -114,6 +111,11 @@ wsServer.on("connection", (socket) => {
         room.boardChanges.forEach(change => {
           player.sendColor(change);
         });
+
+        socket.send(JSON.stringify({
+          msg: "availablePolyminos",
+          polyminos: room.availablePieces[data.color]
+        }));
 
         break;
 
@@ -134,6 +136,11 @@ wsServer.on("connection", (socket) => {
         });
 
         break;
+
+      case "usedPolymino":
+        if (!room) return;
+
+        room.availablePieces[player.color][data.index] = false;
     }
   });
 });

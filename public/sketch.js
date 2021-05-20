@@ -3,6 +3,13 @@ const names = ["red", "green", "blue", "yellow"];
 
 const ws = new WebSocket(`ws://${location.host}/websockets`);
 
+// Ping the server to prevent getting disconnected
+setInterval(() => {
+  ws.send(JSON.stringify({
+    msg: "ping"
+  }));
+}, 10000);
+
 let selectedPolymino = 0;
 
 let firstMove = true;
@@ -13,22 +20,44 @@ const snap = new Audio("snap.mp3");
 
 ws.onmessage = (msg) => {
   const data = JSON.parse(msg.data);
-  if (data.msg === "error") {
-    console.log(data);
-    $("#error").html(data.error);
-  } else if (data.msg === "JoinedRoom") {
-    $("#roomChoice").hide();
-    $("#colorChoice").show();
-  } else if (data.msg === "colors") {
-    if (playerColor !== undefined) return;
 
-    $("#colorChoice").empty();
-
-    for (const availableColor of data.colors) {
-      $("#colorChoice").append(`<button onclick="colorChoice(${availableColor})">${names[availableColor]}</button>`)
+  console.log(data);
+  switch (data.msg) {
+    case "error": {
+      $("#error").html(data.error);
+      break;
     }
-  } else if (data.msg === 'setColor') {
-    setBoardSpot(data.x, data.y, data.color);
+
+    case "JoinedRoom": {
+      $("#roomChoice").hide();
+      $("#colorChoice").show();
+      break;
+    }
+
+    case "colors": {
+      if (playerColor !== undefined) return;
+
+      $("#colorChoice").empty();
+
+      for (const availableColor of data.colors) {
+        $("#colorChoice").append(`<button onclick="colorChoice(${availableColor})">${names[availableColor]}</button>`)
+      }
+      break;
+    }
+
+    case "setColor": {
+      setBoardSpot(data.x, data.y, data.color);
+      break;
+    }
+
+    case "availablePolyminos": {
+      if (data.polyminos.includes(false)) {
+        availablePolyminos = data.polyminos;
+        firstMove = false;
+        showPolyminos();
+      }
+      break;
+    }
   }
 }
 
@@ -127,6 +156,11 @@ function onClick(clickX, clickY) {
 
   const cornerX = clickX - Math.floor(size / 2);
   const cornerY = clickY - Math.floor(size / 2);
+
+  ws.send(JSON.stringify({
+    msg: "usedPolymino",
+    index: selectedPolymino
+  }))
 
   for (let i = 0; i < size; i++) {
     for (let j = 0; j < size; j++) {
