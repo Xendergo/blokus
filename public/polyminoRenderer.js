@@ -1,50 +1,49 @@
-function showPolyminos() {
-  $("#polyminos").empty();
+import { polyminos, availablePolyminos } from "./polyminos.js"
+import { selectedPolymino, colors, playerColor } from "./sketch.js"
 
-  for (let i = 0; i < polyminos.length; i++) {
-    if (!availablePolyminos[i]) continue;
+export function showPolyminos() {
+    $("#polyminos").empty()
 
-    const polymino = polyminos[i];
+    for (let i = 0; i < polyminos.length; i++) {
+        if (!availablePolyminos[i]) continue
 
-    const div = $("<div class='flex-column' style='margin: 16px'></div>");
-    const rows = Math.sqrt(polymino.length);
+        const polymino = polyminos[i]
 
-    let currentFlex;
-    for (let j = 0; j < polymino.length; j++) {
-      if (j % rows === 0) {
-        div.append(currentFlex);
-        currentFlex = $("<div class='flex'></div>");
-      }
+        const div = $("<div class='flex-column' style='margin: 16px'></div>")
+        const rows = Math.sqrt(polymino.length)
 
-      const elt = $(`<span class='tile' onclick='changeSelectedPolymino(${i})'></span>`);
+        let currentFlex
+        for (let j = 0; j < polymino.length; j++) {
+            if (j % rows === 0) {
+                div.append(currentFlex)
+                currentFlex = $("<div class='flex'></div>")
+            }
 
-      colorTile(elt, polymino[j], i);
+            const elt = $(
+                `<span class='tile' onclick='changeSelectedPolymino(${i})'></span>`
+            )
 
-      currentFlex.append(elt);
+            colorTile(elt, polymino[j], i)
+
+            currentFlex.append(elt)
+        }
+
+        div.append(currentFlex)
+
+        $("#polyminos").append(div)
     }
 
-    div.append(currentFlex);
-
-    $("#polyminos").append(div);
-  }
-
-  $("#buttons")[0].hidden = false;
+    $("#buttons")[0].hidden = false
 }
 
 function colorTile(elt, polyminoValue, i) {
-  if (polyminoValue) {
-    if (i === selectedPolymino) {
-      elt[0].style.backgroundColor = colors[playerColor];
+    if (polyminoValue) {
+        if (i === selectedPolymino) {
+            elt[0].style.backgroundColor = colors[playerColor]
+        } else {
+            elt[0].style.backgroundColor = colors[4]
+        }
     } else {
-      elt[0].style.backgroundColor = colors[4];
+        elt[0].style.backgroundColor = "#000000"
     }
-  } else {
-    elt[0].style.backgroundColor = "#000000";
-  }
-}
-
-function changeSelectedPolymino(polymino) {
-  selectedPolymino = polymino;
-  showPolyminos();
-  previewStatusChanged();
 }

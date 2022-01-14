@@ -1,215 +1,271 @@
-const colors = ["#ff0000", "#009700", "#0000ff", "#ADAD00", "#522348", "#7A7A7A"];
-const names = ["red", "green", "blue", "yellow"];
+import {
+    availablePolyminos,
+    polyminos,
+    setAvailablePolyminos,
+} from "./polyminos.js"
+import { showPolyminos } from "./polyminoRenderer.js"
+import { isValidPosition, outsideBoard } from "./positionValidator.js"
+import "./polyminoTransformations.js"
 
-const ws = new WebSocket(`ws://${location.host}/websockets`);
+export const board = []
+export const boardElts = []
+
+export const colors = [
+    "#ff0000",
+    "#009700",
+    "#0000ff",
+    "#ADAD00",
+    "#522348",
+    "#7A7A7A",
+]
+const names = ["red", "green", "blue", "yellow"]
+
+const ws = new WebSocket(`ws://${location.host}/websockets`)
 
 // Ping the server to prevent getting disconnected
 setInterval(() => {
-  ws.send(JSON.stringify({
-    msg: "ping"
-  }));
-}, 10000);
+    ws.send(
+        JSON.stringify({
+            msg: "ping",
+        })
+    )
+}, 10000)
 
-let selectedPolymino = 0;
+export let selectedPolymino = 0
 
-let firstMove = true;
+export function changeSelectedPolymino(polymino) {
+    selectedPolymino = polymino
+    showPolyminos()
+    previewStatusChanged()
+}
 
-let inGame = false;
+window.changeSelectedPolymino = changeSelectedPolymino
 
-const snap = new Audio("snap.mp3");
+export let firstMove = true
 
-ws.onmessage = (msg) => {
-  const data = JSON.parse(msg.data);
+export let inGame = false
 
-  console.log(data);
-  switch (data.msg) {
-    case "error": {
-      $("#error").html(data.error);
-      break;
+const snap = new Audio("snap.mp3")
+
+ws.onmessage = msg => {
+    const data = JSON.parse(msg.data)
+
+    console.log(data)
+    switch (data.msg) {
+        case "error": {
+            $("#error").html(data.error)
+            break
+        }
+
+        case "JoinedRoom": {
+            $("#roomChoice").hide()
+            $("#colorChoice").show()
+            break
+        }
+
+        case "colors": {
+            if (playerColor !== undefined) return
+
+            $("#colorChoice").empty()
+
+            for (const availableColor of data.colors) {
+                $("#colorChoice").append(
+                    `<button onclick="colorChoice(${availableColor})">${names[availableColor]}</button>`
+                )
+            }
+            break
+        }
+
+        case "setColor": {
+            setBoardSpot(data.x, data.y, data.color)
+            break
+        }
+
+        case "availablePolyminos": {
+            if (data.polyminos.includes(false)) {
+                setAvailablePolyminos(data.polyminos)
+                firstMove = false
+                showPolyminos()
+            }
+            break
+        }
     }
-
-    case "JoinedRoom": {
-      $("#roomChoice").hide();
-      $("#colorChoice").show();
-      break;
-    }
-
-    case "colors": {
-      if (playerColor !== undefined) return;
-
-      $("#colorChoice").empty();
-
-      for (const availableColor of data.colors) {
-        $("#colorChoice").append(`<button onclick="colorChoice(${availableColor})">${names[availableColor]}</button>`)
-      }
-      break;
-    }
-
-    case "setColor": {
-      setBoardSpot(data.x, data.y, data.color);
-      break;
-    }
-
-    case "availablePolyminos": {
-      if (data.polyminos.includes(false)) {
-        availablePolyminos = data.polyminos;
-        firstMove = false;
-        showPolyminos();
-      }
-      break;
-    }
-  }
 }
 
 function joinRoom() {
-  ws.send(JSON.stringify({
-    msg: "joinRoom",
-    id: $("#room-id").val()
-  }))
+    ws.send(
+        JSON.stringify({
+            msg: "joinRoom",
+            id: $("#room-id").val(),
+        })
+    )
 }
 
 function createRoom() {
-  ws.send(JSON.stringify({
-    msg: "createRoom",
-    id: $("#room-id").val()
-  }))
+    ws.send(
+        JSON.stringify({
+            msg: "createRoom",
+            id: $("#room-id").val(),
+        })
+    )
 }
 
-const boardElts = [];
-const board = [];
+window.joinRoom = joinRoom
+window.createRoom = createRoom
 
-let hoverX = null;
-let hoverY = null;
+let hoverX = null
+let hoverY = null
 
 /**
  * @type {number}
  */
-let playerColor;
+export let playerColor
 
 function colorChoice(choice) {
-  playerColor = choice;
-  $("#colorChoice").empty();
-  ws.send(JSON.stringify({
-    msg: "color",
-    color: choice
-  }));
+    playerColor = choice
+    $("#colorChoice").empty()
+    ws.send(
+        JSON.stringify({
+            msg: "color",
+            color: choice,
+        })
+    )
 
-  inGame = true;
+    inGame = true
 
-  for (let i = 0; i < 20; i++) {
-    const elts = [];
-    const boardSpots = [];
+    for (let i = 0; i < 20; i++) {
+        const elts = []
+        const boardSpots = []
 
-    for (let j = 0; j < 20; j++) {
-      const elt = $(`<span class='tile' onclick='onClick(${i}, ${j})' onmouseenter='onHover(${i}, ${j})'></span>`);
-      elts.push(elt);
-      boardSpots.push(-1);
+        for (let j = 0; j < 20; j++) {
+            const elt = $(
+                `<span class='tile' onclick='onClick(${i}, ${j})' onmouseenter='onHover(${i}, ${j})'></span>`
+            )
+            elts.push(elt)
+            boardSpots.push(-1)
 
-      elt[0].style.gridColumnStart = j + 1;
-      elt[0].style.gridRowStart = i + 1;
+            elt[0].style.gridColumnStart = j + 1
+            elt[0].style.gridRowStart = i + 1
 
-      $("#board").append(elt);
+            $("#board").append(elt)
+        }
+
+        boardElts.push(elts)
+        board.push(boardSpots)
     }
 
-
-    boardElts.push(elts);
-    board.push(boardSpots);
-  }
-
-  showPolyminos();
+    showPolyminos()
 }
 
+window.colorChoice = colorChoice
+
 function setBoardSpot(x, y, color) {
-  board[x][y] = color;
-  boardElts[x][y][0].style.backgroundColor = colors[color];
-  boardElts[x][y][0].style.animation = "tileChanged 0.4s linear";
+    board[x][y] = color
+    boardElts[x][y][0].style.backgroundColor = colors[color]
+    boardElts[x][y][0].style.animation = "tileChanged 0.4s linear"
 
-  snap.play();
-  $("#mostRecentColor").html(`Most recent color: ${names[color]}`);
+    snap.play()
+    $("#mostRecentColor").html(`Most recent color: ${names[color]}`)
 
-  previewStatusChanged();
+    console.log(board)
+
+    previewStatusChanged()
 }
 
 function rerenderBoard() {
-  for (let x = 0; x < 20; x++) {
-    for (let y = 0; y < 20; y++) {
-      if (board[x][y] === -1) {
-        boardElts[x][y][0].style.backgroundColor = "#303030";
-        continue;
-      }
+    for (let x = 0; x < 20; x++) {
+        for (let y = 0; y < 20; y++) {
+            if (board[x][y] === -1) {
+                boardElts[x][y][0].style.backgroundColor = "#303030"
+                continue
+            }
 
-      boardElts[x][y][0].style.backgroundColor = colors[board[x][y]];
+            boardElts[x][y][0].style.backgroundColor = colors[board[x][y]]
+        }
     }
-  }
 }
 
 function onClick(clickX, clickY) {
-  if (!isValidPosition(clickX, clickY)) return;
+    if (!isValidPosition(clickX, clickY)) return
 
-  firstMove = false;
+    firstMove = false
 
-  const polymino = polyminos[selectedPolymino];
+    const polymino = polyminos[selectedPolymino]
 
-  availablePolyminos[selectedPolymino] = false;
+    availablePolyminos[selectedPolymino] = false
 
-  const size = Math.sqrt(polymino.length);
+    const size = Math.sqrt(polymino.length)
 
-  const cornerX = clickX - Math.floor(size / 2);
-  const cornerY = clickY - Math.floor(size / 2);
+    const cornerX = clickX - Math.floor(size / 2)
+    const cornerY = clickY - Math.floor(size / 2)
 
-  ws.send(JSON.stringify({
-    msg: "usedPolymino",
-    index: selectedPolymino
-  }))
+    ws.send(
+        JSON.stringify({
+            msg: "usedPolymino",
+            index: selectedPolymino,
+        })
+    )
 
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
-      const x = cornerX + i;
-      const y = cornerY + j;
+    for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+            const x = cornerX + i
+            const y = cornerY + j
 
-      if (polymino[i * size + j] === 0) continue;
+            if (polymino[i * size + j] === 0) continue
 
-      ws.send(JSON.stringify({
-        msg: "setColor",
-        x,
-        y,
-        color: playerColor
-      }));
+            ws.send(
+                JSON.stringify({
+                    msg: "setColor",
+                    x,
+                    y,
+                    color: playerColor,
+                })
+            )
+        }
     }
-  }
 
-  selectedPolymino = availablePolyminos.indexOf(true);
-  showPolyminos();
+    selectedPolymino = availablePolyminos.indexOf(true)
+    showPolyminos()
 }
 
 function onHover(x, y) {
-  hoverX = x;
-  hoverY = y;
-  previewStatusChanged();
+    hoverX = x
+    hoverY = y
+    previewStatusChanged()
 }
 
-function previewStatusChanged() {
-  if (hoverX === null || hoverY === null) return;
+window.onClick = onClick
+window.onHover = onHover
 
-  rerenderBoard();
-  const valid = isValidPosition(hoverX, hoverY);
+export function previewStatusChanged() {
+    if (hoverX === null || hoverY === null) return
 
-  if (selectedPolymino === -1) return;
+    rerenderBoard()
+    const valid = isValidPosition(hoverX, hoverY)
 
-  const polymino = polyminos[selectedPolymino];
-  const size = Math.sqrt(polymino.length);
+    if (selectedPolymino === -1) return
 
-  const cornerX = hoverX - Math.floor(size / 2);
-  const cornerY = hoverY - Math.floor(size / 2);
+    const polymino = polyminos[selectedPolymino]
+    const size = Math.sqrt(polymino.length)
 
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
-      const x = cornerX + i;
-      const y = cornerY + j;
+    const cornerX = hoverX - Math.floor(size / 2)
+    const cornerY = hoverY - Math.floor(size / 2)
 
-      if (outsideBoard(x, y) || board[x][y] != -1 || polymino[i * size + j] === 0) continue;
+    for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+            const x = cornerX + i
+            const y = cornerY + j
 
-      boardElts[x][y][0].style.backgroundColor = valid ? colors[4] : colors[5];
+            if (
+                outsideBoard(x, y) ||
+                board[x][y] != -1 ||
+                polymino[i * size + j] === 0
+            )
+                continue
+
+            boardElts[x][y][0].style.backgroundColor = valid
+                ? colors[4]
+                : colors[5]
+        }
     }
-  }
 }
