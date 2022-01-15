@@ -12,6 +12,8 @@ import {
     rotation90Deg,
     noTransformation,
     composeTransformation,
+    transformationMap,
+    transformations,
 } from "./polyminoTransformations.js"
 
 export const board = []
@@ -83,8 +85,25 @@ ws.onmessage = msg => {
             break
         }
 
-        case "setColor": {
-            setBoardSpot(data.x, data.y, data.color)
+        case "placedPolymino": {
+            let polymino = transformations[data.transformation](
+                polyminos[data.index]
+            )
+            let size = Math.sqrt(polymino.length)
+
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    if (polymino[j * size + i] === 1) {
+                        setBoardSpot(data.x + i, data.y + j, data.color)
+                    }
+                }
+            }
+
+            snap.play()
+            $("#mostRecentColor").html(
+                `Most recent color: ${names[data.color]}`
+            )
+
             break
         }
 
@@ -151,8 +170,8 @@ function colorChoice(choice) {
             elts.push(elt)
             boardSpots.push(-1)
 
-            elt[0].style.gridColumnStart = j + 1
-            elt[0].style.gridRowStart = i + 1
+            elt[0].style.gridColumnStart = i + 1
+            elt[0].style.gridRowStart = j + 1
 
             $("#board").append(elt)
         }
@@ -170,11 +189,6 @@ function setBoardSpot(x, y, color) {
     board[x][y] = color
     boardElts[x][y][0].style.backgroundColor = colors[color]
     boardElts[x][y][0].style.animation = "tileChanged 0.4s linear"
-
-    snap.play()
-    $("#mostRecentColor").html(`Most recent color: ${names[color]}`)
-
-    console.log(board)
 
     previewStatusChanged()
 }
@@ -208,28 +222,13 @@ function onClick(clickX, clickY) {
 
     ws.send(
         JSON.stringify({
-            msg: "usedPolymino",
+            msg: "placedPolymino",
             index: selectedPolymino,
+            x: cornerX,
+            y: cornerY,
+            transformation: transformationMap.get(transformation),
         })
     )
-
-    for (let i = 0; i < size; i++) {
-        for (let j = 0; j < size; j++) {
-            const x = cornerX + i
-            const y = cornerY + j
-
-            if (polymino[i * size + j] === 0) continue
-
-            ws.send(
-                JSON.stringify({
-                    msg: "setColor",
-                    x,
-                    y,
-                    color: playerColor,
-                })
-            )
-        }
-    }
 
     selectedPolymino = availablePolyminos.indexOf(true)
     showPolyminos()
@@ -260,8 +259,8 @@ export function previewStatusChanged() {
 
     for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
-            const x = cornerX + i
-            const y = cornerY + j
+            const x = cornerX + j
+            const y = cornerY + i
 
             if (
                 outsideBoard(x, y) ||

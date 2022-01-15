@@ -1,3 +1,11 @@
+import { polyminos } from "./public/polyminos.js"
+import {
+    composeTransformation,
+    transformations,
+    verticalFlip,
+    transformationMap,
+} from "./public/polyminoTransformations.js"
+
 function* generateIdFunc() {
     let currentId = 0n
 
@@ -17,14 +25,25 @@ export class Player {
         this.id = generateId.next()
     }
 
-    sendColor(msg) {
-        this.socket.send(
-            JSON.stringify({
-                msg: "setColor",
-                x: this.flipped ? 19 - msg.x : msg.x,
-                y: msg.y,
-                color: msg.color,
-            })
-        )
+    sendPlacedPolymino(msg) {
+        const newMsg = {
+            msg: "placedPolymino",
+            index: msg.index,
+            x: msg.x,
+            y: this.flipped
+                ? 20 - msg.y - Math.sqrt(polyminos[msg.index].length)
+                : msg.y,
+            transformation: this.flipped
+                ? transformationMap.get(
+                      composeTransformation(
+                          transformations[msg.transformation],
+                          verticalFlip
+                      )
+                  )
+                : msg.transformation,
+            color: msg.color,
+        }
+
+        this.socket.send(JSON.stringify(newMsg))
     }
 }

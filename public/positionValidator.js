@@ -21,8 +21,8 @@ export function isValidPosition(centerX, centerY) {
 
     for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
-            const x = cornerX + i
-            const y = cornerY + j
+            const x = cornerX + j
+            const y = cornerY + i
             const polyminoIndex = i * size + j
 
             if (polymino[polyminoIndex]) {

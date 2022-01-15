@@ -52,9 +52,9 @@ export const diagonalFlip1 = transformation((x, y, size) => [
 
 export const diagonalFlip2 = transformation((x, y, size) => [y, x])
 
-const transformationMap = new Map()
+export const transformationMap = new Map()
 
-const transformations = [
+export const transformations = [
     noTransformation,
     rotation90Deg,
     rotation180Deg,

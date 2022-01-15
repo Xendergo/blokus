@@ -6,6 +6,13 @@ import http from "http"
 import Discord from "discord.js"
 import { fileURLToPath } from "url"
 import { dirname } from "path"
+import { polyminos } from "./public/polyminos.js"
+import {
+    composeTransformation,
+    transformations,
+    verticalFlip,
+    transformationMap,
+} from "./public/polyminoTransformations.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -158,7 +165,7 @@ wsServer.on("connection", socket => {
                 }
 
                 room.boardChanges.forEach(change => {
-                    player.sendColor(change)
+                    player.sendPlacedPolymino(change)
                 })
 
                 socket.send(
@@ -170,28 +177,35 @@ wsServer.on("connection", socket => {
 
                 break
 
-            case "setColor":
+            case "placedPolymino":
                 if (!room) return
 
                 const msg = {
-                    msg: "setColor",
-                    x: player.flipped ? 19 - data.x : data.x,
-                    y: data.y,
-                    color: data.color,
+                    msg: "placedPolymino",
+                    index: data.index,
+                    x: data.x,
+                    y: player.flipped
+                        ? 20 - data.y - Math.sqrt(polyminos[data.index].length)
+                        : data.y,
+                    transformation: player.flipped
+                        ? transformationMap.get(
+                              composeTransformation(
+                                  transformations[data.transformation],
+                                  verticalFlip
+                              )
+                          )
+                        : data.transformation,
+                    color: player.color,
                 }
+
+                room.availablePieces[msg.color][msg.index] = false
 
                 room.boardChanges.push(msg)
 
                 Array.from(room.players.values()).forEach(otherPlayer => {
-                    otherPlayer.sendColor(msg)
+                    if (otherPlayer.color !== null)
+                        otherPlayer.sendPlacedPolymino(msg)
                 })
-
-                break
-
-            case "usedPolymino":
-                if (!room) return
-
-                room.availablePieces[player.color][data.index] = false
         }
     })
 })
