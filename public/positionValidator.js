@@ -1,11 +1,17 @@
-import { selectedPolymino, firstMove, board, playerColor } from "./sketch.js"
+import {
+    selectedPolymino,
+    firstMove,
+    board,
+    playerColor,
+    transformation,
+} from "./sketch.js"
 import { polyminos } from "./polyminos.js"
 
 export function isValidPosition(centerX, centerY) {
     // the player doesn't have a polymino selected
     if (selectedPolymino === -1) return false
 
-    const polymino = polyminos[selectedPolymino]
+    const polymino = transformation(polyminos[selectedPolymino])
     const size = Math.sqrt(polymino.length)
 
     const cornerX = centerX - Math.floor(size / 2)
@@ -20,23 +26,23 @@ export function isValidPosition(centerX, centerY) {
             const polyminoIndex = i * size + j
 
             if (polymino[polyminoIndex]) {
-                if (outsideBoard(x, y)) return false
+                if (
+                    outsideBoard(x, y) ||
+                    positionOccupied(x, y) ||
+                    adjacentToSamePiece(x, y)
+                )
+                    return false
 
-                // On top of another piece
-                if (board[x][y] != -1) return false
-
-                // Adjacent to same color piece
-                if (!checkAdjacent(x, y)) return false
-
-                console.log(connectsPiece(x, y))
-
-                // Check if this part of the piece connects it to another piece
                 cornerConnected = cornerConnected || connectsPiece(x, y)
             }
         }
     }
 
     return cornerConnected
+}
+
+function positionOccupied(x, y) {
+    return board[x][y] !== -1
 }
 
 function positionSameColor(x, y) {
@@ -47,13 +53,13 @@ function positionSameColor(x, y) {
     return false
 }
 
-function checkAdjacent(x, y) {
-    if (positionSameColor(x - 1, y)) return false
-    if (positionSameColor(x, y - 1)) return false
-    if (positionSameColor(x + 1, y)) return false
-    if (positionSameColor(x, y + 1)) return false
+function adjacentToSamePiece(x, y) {
+    if (positionSameColor(x - 1, y)) return true
+    if (positionSameColor(x, y - 1)) return true
+    if (positionSameColor(x + 1, y)) return true
+    if (positionSameColor(x, y + 1)) return true
 
-    return true
+    return false
 }
 
 function connectsPiece(x, y) {

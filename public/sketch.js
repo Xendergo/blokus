@@ -5,7 +5,14 @@ import {
 } from "./polyminos.js"
 import { showPolyminos } from "./polyminoRenderer.js"
 import { isValidPosition, outsideBoard } from "./positionValidator.js"
-import "./polyminoTransformations.js"
+import {
+    verticalFlip,
+    horizontalFlip,
+    rotation270Deg,
+    rotation90Deg,
+    noTransformation,
+    composeTransformation,
+} from "./polyminoTransformations.js"
 
 export const board = []
 export const boardElts = []
@@ -190,7 +197,7 @@ function onClick(clickX, clickY) {
 
     firstMove = false
 
-    const polymino = polyminos[selectedPolymino]
+    const polymino = transformation(polyminos[selectedPolymino])
 
     availablePolyminos[selectedPolymino] = false
 
@@ -245,7 +252,7 @@ export function previewStatusChanged() {
 
     if (selectedPolymino === -1) return
 
-    const polymino = polyminos[selectedPolymino]
+    const polymino = transformation(polyminos[selectedPolymino])
     const size = Math.sqrt(polymino.length)
 
     const cornerX = hoverX - Math.floor(size / 2)
@@ -269,3 +276,31 @@ export function previewStatusChanged() {
         }
     }
 }
+
+export let transformation = noTransformation
+
+document.addEventListener("keypress", e => {
+    if (!inGame) return
+
+    if (e.key === "a" || e.key === "ArrowLeft") {
+        horizontalFlipAll()
+    } else if (e.key === "w" || e.key === "ArrowUp") {
+        verticalFlipAll()
+    } else if (e.key === "s" || e.key === "ArrowDown") {
+        counterClockwiseRotationAll()
+    } else if (e.key === "d" || e.key === "ArrowRight") {
+        clockwiseRotationAll()
+    }
+})
+
+function transformAll(nextTransformation) {
+    transformation = composeTransformation(transformation, nextTransformation)
+
+    showPolyminos()
+    previewStatusChanged()
+}
+
+window.verticalFlipAll = () => transformAll(verticalFlip)
+window.horizontalFlipAll = () => transformAll(horizontalFlip)
+window.counterClockwiseRotationAll = () => transformAll(rotation90Deg)
+window.clockwiseRotationAll = () => transformAll(rotation270Deg)

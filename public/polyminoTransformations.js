@@ -1,102 +1,88 @@
-import { inGame, previewStatusChanged } from "./sketch.js"
-import { showPolyminos } from "./polyminoRenderer.js"
-import { polyminos } from "./polyminos.js"
+/*
+https://www.cs.umb.edu/~eb/d4/index.html
 
-document.addEventListener("keypress", e => {
-    if (!inGame) return
+Square symmetry group:
 
-    if (e.key === "a" || e.key === "ArrowLeft") {
-        horizontalFlip()
-    } else if (e.key === "w" || e.key === "ArrowUp") {
-        verticalFlip()
-    } else if (e.key === "s" || e.key === "ArrowDown") {
-        counterClockwiseRotation()
-    } else if (e.key === "d" || e.key === "ArrowRight") {
-        clockwiseRotation()
-    }
-})
+No transformation: 0
+90deg rotation: 1
+180deg rotation: 2
+270deg rotation: 3
+Horizontal flip: 4
+Vertical flip: 5
+Diagonal flip 1: 6
+Diagonal flip 2: 7
+*/
 
-function verticalFlip() {
-    for (const polymino of polyminos) {
-        const size = Math.sqrt(polymino.length)
-
-        for (let j = 0; j < size; j++) {
-            for (let k = 0; k < size / 2; k++) {
-                let pos1 = k * size + j
-                let pos2 = (size - k - 1) * size + j
-
-                let temp = polymino[pos2]
-                polymino[pos2] = polymino[pos1]
-                polymino[pos1] = temp
-            }
-        }
-    }
-
-    showPolyminos()
-    previewStatusChanged()
-}
-
-function horizontalFlip() {
-    for (const polymino of polyminos) {
-        const size = Math.sqrt(polymino.length)
-
-        for (let j = 0; j < size / 2; j++) {
-            for (let k = 0; k < size; k++) {
-                let pos1 = k * size + j
-                let pos2 = k * size + (size - j - 1)
-
-                let temp = polymino[pos2]
-                polymino[pos2] = polymino[pos1]
-                polymino[pos1] = temp
-            }
-        }
-    }
-
-    showPolyminos()
-    previewStatusChanged()
-}
-
-function counterClockwiseRotation() {
-    for (let i = 0; i < polyminos.length; i++) {
-        const polymino = polyminos[i]
-
+function transformation(f) {
+    return polymino => {
         const size = Math.sqrt(polymino.length)
         const newPolymino = new Array(polymino.length)
 
-        for (let j = 0; j < size; j++) {
-            for (let k = 0; k < size; k++) {
-                newPolymino[k + (size - j - 1) * size] = polymino[k * size + j]
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                let [transformedI, transformedJ] = f(i, j, size)
+                newPolymino[transformedJ * size + transformedI] =
+                    polymino[j * size + i]
             }
         }
 
-        polyminos[i] = newPolymino
+        return newPolymino
     }
-
-    showPolyminos()
-    previewStatusChanged()
 }
 
-function clockwiseRotation() {
-    for (let i = 0; i < polyminos.length; i++) {
-        const polymino = polyminos[i]
+export const noTransformation = transformation((x, y, size) => [x, y])
 
-        const size = Math.sqrt(polymino.length)
-        const newPolymino = new Array(polymino.length)
+export const rotation90Deg = transformation((x, y, size) => [y, size - x - 1])
 
-        for (let j = 0; j < size; j++) {
-            for (let k = 0; k < size; k++) {
-                newPolymino[size - k - 1 + j * size] = polymino[k * size + j]
-            }
-        }
+export const rotation180Deg = transformation((x, y, size) => [
+    size - x - 1,
+    size - y - 1,
+])
 
-        polyminos[i] = newPolymino
-    }
+export const rotation270Deg = transformation((x, y, size) => [size - y - 1, x])
 
-    showPolyminos()
-    previewStatusChanged()
+export const verticalFlip = transformation((x, y, size) => [x, size - y - 1])
+
+export const horizontalFlip = transformation((x, y, size) => [size - x - 1, y])
+
+export const diagonalFlip1 = transformation((x, y, size) => [
+    size - y - 1,
+    size - x - 1,
+])
+
+export const diagonalFlip2 = transformation((x, y, size) => [y, x])
+
+const transformationMap = new Map()
+
+const transformations = [
+    noTransformation,
+    rotation90Deg,
+    rotation180Deg,
+    rotation270Deg,
+    horizontalFlip,
+    verticalFlip,
+    diagonalFlip1,
+    diagonalFlip2,
+]
+
+for (let i = 0; i < transformations.length; i++) {
+    transformationMap.set(transformations[i], i)
 }
 
-window.verticalFlip = verticalFlip
-window.horizontalFlip = horizontalFlip
-window.counterClockwiseRotation = counterClockwiseRotation
-window.clockwiseRotation = clockwiseRotation
+const compositionTable = [
+    [0, 1, 2, 3, 4, 5, 6, 7],
+    [1, 2, 3, 0, 6, 7, 5, 4],
+    [2, 3, 0, 1, 5, 4, 7, 6],
+    [3, 0, 1, 2, 7, 6, 4, 5],
+    [4, 7, 5, 6, 0, 2, 3, 1],
+    [5, 6, 4, 7, 2, 0, 1, 1],
+    [6, 4, 7, 5, 1, 3, 0, 2],
+    [7, 5, 6, 4, 3, 1, 2, 0],
+]
+
+export function composeTransformation(first, second) {
+    let firstIndex = transformationMap.get(first)
+    let secondIndex = transformationMap.get(second)
+
+    return transformations[compositionTable[firstIndex][secondIndex]]
+}

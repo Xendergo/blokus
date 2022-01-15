@@ -1,5 +1,10 @@
 import { polyminos, availablePolyminos } from "./polyminos.js"
-import { selectedPolymino, colors, playerColor } from "./sketch.js"
+import {
+    selectedPolymino,
+    colors,
+    playerColor,
+    transformation,
+} from "./sketch.js"
 
 export function showPolyminos() {
     $("#polyminos").empty()
@@ -7,7 +12,7 @@ export function showPolyminos() {
     for (let i = 0; i < polyminos.length; i++) {
         if (!availablePolyminos[i]) continue
 
-        const polymino = polyminos[i]
+        const polymino = transformation(polyminos[i])
 
         const div = $("<div class='flex-column' style='margin: 16px'></div>")
         const rows = Math.sqrt(polymino.length)
