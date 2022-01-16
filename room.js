@@ -20,19 +20,17 @@ export class Room {
         for (let i = 0; i < size; i++) {
             for (let j = 0; j < size; j++) {
                 if (polymino[j * size + i] === 1) {
-                    this.board[y + j][x + i] = color
+                    this.board[x + i][y + j] = color
                 }
             }
         }
     }
 
     isValidPosition(x, y, polymino, playerColor, firstMove) {
-        let offset = Math.floor(Math.sqrt(polymino.length) / 2)
-
         return isValidPosition(
             this.board,
-            x + offset,
-            y + offset,
+            x,
+            y,
             polymino,
             playerColor,
             firstMove

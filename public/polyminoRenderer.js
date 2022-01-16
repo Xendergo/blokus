@@ -4,51 +4,63 @@ import {
     colors,
     playerColor,
     transformation,
+    changeSelectedPolymino,
 } from "./sketch.js"
 
 export function showPolyminos() {
-    $("#polyminos").empty()
+    document.querySelectorAll("#polyminos *")?.forEach(elt => elt.remove())
 
     for (let i = 0; i < polyminos.length; i++) {
         if (!availablePolyminos[i]) continue
 
         const polymino = transformation(polyminos[i])
 
-        const div = $("<div class='flex-column' style='margin: 16px'></div>")
+        const div = document.createElement("div")
+        div.style.margin = "16px"
+        div.classList.add("flex-column")
+
         const rows = Math.sqrt(polymino.length)
 
         let currentFlex
+
         for (let j = 0; j < polymino.length; j++) {
             if (j % rows === 0) {
-                div.append(currentFlex)
-                currentFlex = $("<div class='flex'></div>")
+                if (currentFlex) {
+                    div.appendChild(currentFlex)
+                }
+
+                currentFlex = document.createElement("div")
+                currentFlex.classList.add("flex")
             }
 
-            const elt = $(
-                `<span class='tile' onclick='changeSelectedPolymino(${i})'></span>`
-            )
+            const elt = document.createElement("span")
+
+            elt.classList.add("tile")
+            elt.addEventListener("click", () => {
+                changeSelectedPolymino(i)
+            })
 
             colorTile(elt, polymino[j], i)
 
-            currentFlex.append(elt)
+            currentFlex.appendChild(elt)
         }
 
-        div.append(currentFlex)
+        div.appendChild(currentFlex)
 
-        $("#polyminos").append(div)
+        document.querySelector("#polyminos").appendChild(div)
     }
 
-    $("#buttons")[0].hidden = false
+    document.querySelector("#buttons").hidden = false
 }
 
 function colorTile(elt, polyminoValue, i) {
     if (polyminoValue) {
         if (i === selectedPolymino) {
-            elt[0].style.backgroundColor = colors[playerColor]
+            elt.style.backgroundColor = colors[playerColor]
         } else {
-            elt[0].style.backgroundColor = colors[4]
+            elt.style.backgroundColor = colors[4]
         }
     } else {
-        elt[0].style.backgroundColor = "#000000"
+        elt.style.backgroundColor = "#000000"
     }
 }

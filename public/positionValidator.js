@@ -1,15 +1,12 @@
 export function isValidPosition(
     board,
-    centerX,
-    centerY,
+    cornerX,
+    cornerY,
     polymino,
     playerColor,
     firstMove
 ) {
     const size = Math.sqrt(polymino.length)
-
-    const cornerX = centerX - Math.floor(size / 2)
-    const cornerY = centerY - Math.floor(size / 2)
 
     let cornerConnected = false
 

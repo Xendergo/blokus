@@ -154,18 +154,22 @@ wsServer.on("connection", socket => {
                 player.color = data.color
 
                 for (const otherPlayer of room.players.values()) {
-                    otherPlayer.socket.send(
-                        JSON.stringify({
-                            msg: "colors",
-                            colors: room.colors.filter(
-                                c =>
-                                    !Array.from(room.players.values()).reduce(
-                                        (a, v) => a || v.color === c,
-                                        false
-                                    )
-                            ),
-                        })
-                    )
+                    if (otherPlayer.color === null) {
+                        otherPlayer.socket.send(
+                            JSON.stringify({
+                                msg: "colors",
+                                colors: room.colors.filter(
+                                    c =>
+                                        !Array.from(
+                                            room.players.values()
+                                        ).reduce(
+                                            (a, v) => a || v.color === c,
+                                            false
+                                        )
+                                ),
+                            })
+                        )
+                    }
                 }
 
                 room.boardChanges.forEach(change => {
@@ -216,6 +220,8 @@ wsServer.on("connection", socket => {
                     )
                 )
                     return
+
+                player.firstMove = false
 
                 room.availablePieces[msg.color][msg.index] = false
 
