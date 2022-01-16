@@ -1,17 +1,11 @@
-import {
-    selectedPolymino,
-    firstMove,
+export function isValidPosition(
     board,
+    centerX,
+    centerY,
+    polymino,
     playerColor,
-    transformation,
-} from "./sketch.js"
-import { polyminos } from "./polyminos.js"
-
-export function isValidPosition(centerX, centerY) {
-    // the player doesn't have a polymino selected
-    if (selectedPolymino === -1) return false
-
-    const polymino = transformation(polyminos[selectedPolymino])
+    firstMove
+) {
     const size = Math.sqrt(polymino.length)
 
     const cornerX = centerX - Math.floor(size / 2)
@@ -28,12 +22,14 @@ export function isValidPosition(centerX, centerY) {
             if (polymino[polyminoIndex]) {
                 if (
                     outsideBoard(x, y) ||
-                    positionOccupied(x, y) ||
-                    adjacentToSamePiece(x, y)
+                    positionOccupied(x, y, board) ||
+                    adjacentToSamePiece(x, y, board, playerColor)
                 )
                     return false
 
-                cornerConnected = cornerConnected || connectsPiece(x, y)
+                cornerConnected =
+                    cornerConnected ||
+                    connectsPiece(x, y, board, playerColor, firstMove)
             }
         }
     }
@@ -41,11 +37,11 @@ export function isValidPosition(centerX, centerY) {
     return cornerConnected
 }
 
-function positionOccupied(x, y) {
+function positionOccupied(x, y, board) {
     return board[x][y] !== -1
 }
 
-function positionSameColor(x, y) {
+function positionSameColor(x, y, board, playerColor) {
     try {
         if (board[x][y] == playerColor) return true
     } catch {}
@@ -53,22 +49,22 @@ function positionSameColor(x, y) {
     return false
 }
 
-function adjacentToSamePiece(x, y) {
-    if (positionSameColor(x - 1, y)) return true
-    if (positionSameColor(x, y - 1)) return true
-    if (positionSameColor(x + 1, y)) return true
-    if (positionSameColor(x, y + 1)) return true
+function adjacentToSamePiece(x, y, board, playerColor) {
+    if (positionSameColor(x - 1, y, board, playerColor)) return true
+    if (positionSameColor(x, y - 1, board, playerColor)) return true
+    if (positionSameColor(x + 1, y, board, playerColor)) return true
+    if (positionSameColor(x, y + 1, board, playerColor)) return true
 
     return false
 }
 
-function connectsPiece(x, y) {
+function connectsPiece(x, y, board, playerColor, firstMove) {
     let cornerConnected = 0
     // Corner is connected to same color piece
-    cornerConnected |= positionSameColor(x - 1, y - 1)
-    cornerConnected |= positionSameColor(x + 1, y - 1)
-    cornerConnected |= positionSameColor(x - 1, y + 1)
-    cornerConnected |= positionSameColor(x + 1, y + 1)
+    cornerConnected |= positionSameColor(x - 1, y - 1, board, playerColor)
+    cornerConnected |= positionSameColor(x + 1, y - 1, board, playerColor)
+    cornerConnected |= positionSameColor(x - 1, y + 1, board, playerColor)
+    cornerConnected |= positionSameColor(x + 1, y + 1, board, playerColor)
 
     // If it's the first move, you can put a piece touching the corner of the grid
     if (firstMove) {

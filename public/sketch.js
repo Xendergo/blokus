@@ -207,7 +207,17 @@ function rerenderBoard() {
 }
 
 function onClick(clickX, clickY) {
-    if (!isValidPosition(clickX, clickY)) return
+    if (
+        !isValidPosition(
+            board,
+            clickX,
+            clickY,
+            transformation(polyminos[selectedPolymino]),
+            playerColor,
+            firstMove
+        )
+    )
+        return
 
     firstMove = false
 
@@ -247,7 +257,14 @@ export function previewStatusChanged() {
     if (hoverX === null || hoverY === null) return
 
     rerenderBoard()
-    const valid = isValidPosition(hoverX, hoverY)
+    const valid = isValidPosition(
+        board,
+        hoverX,
+        hoverY,
+        transformation(polyminos[selectedPolymino]),
+        playerColor,
+        firstMove
+    )
 
     if (selectedPolymino === -1) return
 

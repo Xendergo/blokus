@@ -23,6 +23,7 @@ export class Player {
         this.socket = socket
         this.flipped = flipped
         this.id = generateId.next()
+        this.firstMove = true
     }
 
     sendPlacedPolymino(msg) {

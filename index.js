@@ -62,6 +62,10 @@ wsServer.on("connection", socket => {
      * @type {Player}
      */
     let player
+
+    /**
+     * @type {Room}
+     */
     let room
     let roomId
 
@@ -198,9 +202,26 @@ wsServer.on("connection", socket => {
                     color: player.color,
                 }
 
+                const polymino = transformations[msg.transformation](
+                    polyminos[msg.index]
+                )
+
+                if (
+                    !room.isValidPosition(
+                        msg.x,
+                        msg.y,
+                        polymino,
+                        msg.color,
+                        player.firstMove
+                    )
+                )
+                    return
+
                 room.availablePieces[msg.color][msg.index] = false
 
                 room.boardChanges.push(msg)
+
+                room.placePolymino(msg.x, msg.y, polymino, msg.color)
 
                 Array.from(room.players.values()).forEach(otherPlayer => {
                     if (otherPlayer.color !== null)
