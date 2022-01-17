@@ -94,3 +94,11 @@ export function sendPlacedPolymino(selectedPolymino, cornerX, cornerY) {
         })
     )
 }
+
+function giveFeedback() {
+    let feedback = document.querySelector("#feedback").value
+
+    ws.send(JSON.stringify({ msg: "feedback", feedback }))
+}
+
+window.giveFeedback = giveFeedback

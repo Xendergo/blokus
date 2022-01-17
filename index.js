@@ -4,6 +4,8 @@ import express from "express"
 import ws from "ws"
 import { fileURLToPath } from "url"
 import { dirname } from "path"
+import fs from "fs/promises"
+import { homedir } from "os"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -56,7 +58,15 @@ wsServer.on("connection", socket => {
     socket.on("message", dataJson => {
         const data = JSON.parse(dataJson)
         switch (data.msg) {
-            case "joinRoom":
+            case "feedback": {
+                fs.appendFile(
+                    `${homedir()}/.local/share/blokus-data/feedback.txt`,
+                    data.feedback.replaceAll("\t", " ") + "\t"
+                )
+                break
+            }
+
+            case "joinRoom": {
                 if (!rooms.has(data.id)) {
                     rooms.set(data.id, new Room())
                 }
@@ -70,13 +80,15 @@ wsServer.on("connection", socket => {
                 player.sendRoomInfo(room)
 
                 break
+            }
 
-            case "color":
+            case "color": {
                 if (!room) return
                 player.colorChosen(data.color, room)
                 break
+            }
 
-            case "placedPolymino":
+            case "placedPolymino": {
                 if (!room) return
                 player.placedPolymino(
                     room,
@@ -85,6 +97,8 @@ wsServer.on("connection", socket => {
                     data.y,
                     data.transformation
                 )
+                break
+            }
         }
     })
 })

@@ -6,7 +6,8 @@
 }
 
 button,
-input {
+input,
+textarea {
     background-color: transparent;
     border: 2px solid white;
     padding: 8px;
