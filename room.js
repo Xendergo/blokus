@@ -68,7 +68,7 @@ export class Room {
 
     /**
      * Get which colors aren't already taken by players
-     * @returns numnber[]
+     * @returns {number[]}
      */
     availableColors() {
         return colors.filter(

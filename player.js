@@ -29,6 +29,15 @@ export class Player {
         this.firstMove = true
     }
 
+    /**
+     * Generate the message that can be sent to the client to say that the given polymino was placed
+     * @param {number} index The polymino's index
+     * @param {number} x X position
+     * @param {number} y Y position
+     * @param {number} transformation The polymino's transformation
+     * @param {number} color The polymino's color
+     * @returns {*}
+     */
     generatePlacedPolyminoMsg(index, x, y, transformation, color) {
         return {
             msg: "placedPolymino",
@@ -65,6 +74,10 @@ export class Player {
         )
     }
 
+    /**
+     * Tell the player that they successfully joined the room and what colors they have available
+     * @param {*} room
+     */
     sendRoomInfo(room) {
         this.socket.send(
             JSON.stringify({
@@ -80,6 +93,11 @@ export class Player {
         )
     }
 
+    /**
+     * When the player chooses their color
+     * @param {number} color The color they chose
+     * @param {*} room
+     */
     colorChosen(color, room) {
         this.color = color
 
@@ -106,6 +124,14 @@ export class Player {
         )
     }
 
+    /**
+     * When the user places a polymino
+     * @param {*} room
+     * @param {number} index
+     * @param {number} x
+     * @param {number} y
+     * @param {number} transformation
+     */
     placedPolymino(room, index, x, y, transformation) {
         const msg = this.generatePlacedPolyminoMsg(
             index,

@@ -4,13 +4,6 @@ import express from "express"
 import ws from "ws"
 import { fileURLToPath } from "url"
 import { dirname } from "path"
-import { polyminos } from "./public/polyminos.js"
-import {
-    composeTransformation,
-    transformations,
-    verticalFlip,
-    transformationMap,
-} from "./public/polyminoTransformations.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
