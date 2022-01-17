@@ -12,9 +12,9 @@ import {
     rotation90Deg,
     noTransformation,
     composeTransformation,
-    transformationMap,
     transformations,
 } from "./polyminoTransformations.js"
+import { sendColorChoice, sendPlacedPolymino } from "./network.js"
 
 export const board = []
 export const boardElts = []
@@ -28,17 +28,6 @@ export const colors = [
     "#7A7A7A",
 ]
 const names = ["red", "green", "blue", "yellow"]
-
-const ws = new WebSocket(`ws://${location.host}/websockets`)
-
-// Ping the server to prevent getting disconnected
-setInterval(() => {
-    ws.send(
-        JSON.stringify({
-            msg: "ping",
-        })
-    )
-}, 10000)
 
 export let selectedPolymino = 0
 
@@ -54,81 +43,51 @@ export let inGame = false
 
 const snap = new Audio("snap.mp3")
 
-ws.onmessage = msg => {
-    const data = JSON.parse(msg.data)
+export function onJoinRoom() {
+    document.querySelector("#roomChoice").hidden = true
+    document.querySelector("#colorChoice").hidden = false
+}
 
-    console.log(data)
+export function onReceiveColors(availableColors) {
+    if (playerColor !== undefined) return
 
-    switch (data.msg) {
-        case "JoinedRoom": {
-            document.querySelector("#roomChoice").hidden = true
-            document.querySelector("#colorChoice").hidden = false
-            break
-        }
+    document.querySelectorAll("#colorChoice *")?.forEach(elt => elt.remove())
 
-        case "colors": {
-            if (playerColor !== undefined) return
+    for (const availableColor of availableColors) {
+        const button = document.createElement("button")
 
-            document
-                .querySelectorAll("#colorChoice *")
-                ?.forEach(elt => elt.remove())
+        button.innerHTML = names[availableColor]
+        button.addEventListener("click", () => colorChoice(availableColor))
 
-            for (const availableColor of data.colors) {
-                const button = document.createElement("button")
-
-                button.innerHTML = names[availableColor]
-                button.addEventListener("click", () =>
-                    colorChoice(availableColor)
-                )
-
-                document.querySelector("#colorChoice").appendChild(button)
-            }
-            break
-        }
-
-        case "placedPolymino": {
-            let polymino = transformations[data.transformation](
-                polyminos[data.index]
-            )
-            let size = Math.sqrt(polymino.length)
-
-            for (let i = 0; i < size; i++) {
-                for (let j = 0; j < size; j++) {
-                    if (polymino[j * size + i] === 1) {
-                        setBoardSpot(data.x + i, data.y + j, data.color)
-                    }
-                }
-            }
-
-            snap.play()
-            document.querySelector(
-                "#mostRecentColor"
-            ).innerHTML = `Most recent color: ${names[data.color]}`
-
-            break
-        }
-
-        case "availablePolyminos": {
-            if (data.polyminos.includes(false)) {
-                setAvailablePolyminos(data.polyminos)
-                firstMove = false
-                showPolyminos()
-            }
-            break
-        }
+        document.querySelector("#colorChoice").appendChild(button)
     }
 }
 
-function joinRoom() {
-    ws.send(
-        JSON.stringify({
-            msg: "joinRoom",
-            id: document.querySelector("#room-id").value,
-        })
-    )
+export function onPolyminoPlaced(polyminoTransformation, index, x, y, color) {
+    let polymino = transformations[polyminoTransformation](polyminos[index])
+    let size = Math.sqrt(polymino.length)
+
+    for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+            if (polymino[j * size + i] === 1) {
+                setBoardSpot(x + i, y + j, color)
+            }
+        }
+    }
+
+    snap.play()
+    document.querySelector(
+        "#mostRecentColor"
+    ).innerHTML = `Most recent color: ${names[color]}`
 }
 
-window.joinRoom = joinRoom
+export function onReceiveAvailablePolyminos(newAvailablePolyminos) {
+    if (newAvailablePolyminos.includes(false)) {
+        setAvailablePolyminos(newAvailablePolyminos)
+        firstMove = false
+        showPolyminos()
+    }
+}
 
 let hoverX = null
 let hoverY = null
@@ -143,12 +102,7 @@ function colorChoice(choice) {
 
     document.querySelectorAll("#colorChoice *")?.forEach(elt => elt.remove())
 
-    ws.send(
-        JSON.stringify({
-            msg: "color",
-            color: choice,
-        })
-    )
+    sendColorChoice(choice)
 
     inGame = true
 
@@ -227,15 +181,7 @@ function onClick(clickX, clickY) {
 
     availablePolyminos[selectedPolymino] = false
 
-    ws.send(
-        JSON.stringify({
-            msg: "placedPolymino",
-            index: selectedPolymino,
-            x: cornerX,
-            y: cornerY,
-            transformation: transformationMap.get(transformation),
-        })
-    )
+    sendPlacedPolymino(selectedPolymino, cornerX, cornerY)
 
     selectedPolymino = availablePolyminos.indexOf(true)
     showPolyminos()
