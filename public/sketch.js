@@ -319,3 +319,24 @@ window.verticalFlipAll = () => transformAll(verticalFlip)
 window.horizontalFlipAll = () => transformAll(horizontalFlip)
 window.counterClockwiseRotationAll = () => transformAll(rotation90Deg)
 window.clockwiseRotationAll = () => transformAll(rotation270Deg)
+
+/**
+ * Called when I check in on feedback and stuff
+ * @param {string[]} feedback
+ */
+export function onAdminData(feedback) {
+    const div = document.createElement("div")
+    div.classList.add("feedbackList")
+
+    for (const item of feedback.reverse()) {
+        const elt = document.createElement("p")
+        const text = document.createTextNode(item)
+        elt.appendChild(text)
+        elt.style.borderBottom = "1px dashed grey"
+        elt.style.margin = "0"
+        elt.style.padding = "8px"
+        div.appendChild(elt)
+    }
+
+    document.querySelector("#roomChoice").appendChild(div)
+}

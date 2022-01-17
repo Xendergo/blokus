@@ -6,6 +6,7 @@ import { fileURLToPath } from "url"
 import { dirname } from "path"
 import fs from "fs/promises"
 import { homedir } from "os"
+import { createHash } from "crypto"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -19,6 +20,14 @@ app.use("/source", express.static(__dirname + "/source.zip"))
 const port = 4000
 const server = app.listen(port)
 console.log("Listening on port " + port)
+
+const dataDir = `${homedir()}/.local/share/blokus-data`
+
+let adminPassword
+
+fs.readFile(`${dataDir}/password.txt`).then(text => {
+    adminPassword = text
+})
 
 const wsServer = new ws.Server({
     server: server,
@@ -60,7 +69,7 @@ wsServer.on("connection", socket => {
         switch (data.msg) {
             case "feedback": {
                 fs.appendFile(
-                    `${homedir()}/.local/share/blokus-data/feedback.txt`,
+                    `${dataDir}/feedback.txt`,
                     data.feedback.replaceAll("\t", " ") + "\t"
                 )
                 break
@@ -99,6 +108,25 @@ wsServer.on("connection", socket => {
                 )
                 break
             }
+
+            case "admin": {
+                const hash = createHash("sha256")
+                hash.update(data.password)
+                if (hash.digest().equals(adminPassword)) {
+                    sendAdminData(socket)
+                }
+            }
         }
     })
 })
+
+async function sendAdminData(socket) {
+    socket.send(
+        JSON.stringify({
+            msg: "adminData",
+            feedback: await (await fs.readFile(`${dataDir}/feedback.txt`))
+                .toString("utf-8")
+                .split("\t"),
+        })
+    )
+}

@@ -4,6 +4,7 @@ import {
     onPolyminoPlaced,
     onReceiveAvailablePolyminos,
     transformation,
+    onAdminData,
 } from "./sketch.js"
 import { transformationMap } from "./polyminoTransformations.js"
 
@@ -45,6 +46,11 @@ ws.onmessage = msg => {
 
         case "availablePolyminos": {
             onReceiveAvailablePolyminos(data.polyminos)
+            break
+        }
+
+        case "adminData": {
+            onAdminData(data.feedback)
             break
         }
     }
@@ -102,3 +108,9 @@ function giveFeedback() {
 }
 
 window.giveFeedback = giveFeedback
+
+function admin(password) {
+    ws.send(JSON.stringify({ msg: "admin", password }))
+}
+
+window.admin = admin
