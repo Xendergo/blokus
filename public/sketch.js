@@ -60,11 +60,6 @@ ws.onmessage = msg => {
     console.log(data)
 
     switch (data.msg) {
-        case "error": {
-            document.querySelector("#error").innerHTML = data.error
-            break
-        }
-
         case "JoinedRoom": {
             document.querySelector("#roomChoice").hidden = true
             document.querySelector("#colorChoice").hidden = false
@@ -133,17 +128,7 @@ function joinRoom() {
     )
 }
 
-function createRoom() {
-    ws.send(
-        JSON.stringify({
-            msg: "createRoom",
-            id: document.querySelector("#room-id").value,
-        })
-    )
-}
-
 window.joinRoom = joinRoom
-window.createRoom = createRoom
 
 let hoverX = null
 let hoverY = null

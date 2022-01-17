@@ -2,8 +2,6 @@ import { Player } from "./player.js"
 import { Room } from "./room.js"
 import express from "express"
 import ws from "ws"
-import http from "http"
-import Discord from "discord.js"
 import { fileURLToPath } from "url"
 import { dirname } from "path"
 import { polyminos } from "./public/polyminos.js"
@@ -18,25 +16,6 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 const app = express()
-
-const client = new Discord.Client()
-
-client.on("message", msg => {
-    if (
-        msg.author.id === "243542119715700737" &&
-        msg.channel.type === "dm" &&
-        msg.content === "ip"
-    ) {
-        http.get("http://ipecho.net/plain", res => {
-            res.setEncoding("utf-8")
-            res.on("data", chunk => {
-                msg.reply(chunk)
-            })
-        })
-    }
-})
-
-client.login("NjUwMDIxNjYxMzk5MTg3NTE3.XeFR2A.07oNaBTbC3fdsIbu9AQwm1G5XsU")
 
 app.use("/", express.static(__dirname + "/public"))
 
@@ -105,39 +84,9 @@ wsServer.on("connection", socket => {
         switch (data.msg) {
             case "joinRoom":
                 if (!rooms.has(data.id)) {
-                    socket.send(
-                        JSON.stringify({
-                            msg: "error",
-                            error: "There's no room with that id",
-                        })
-                    )
-
-                    return
+                    rooms.set(data.id, new Room())
                 }
 
-                room = rooms.get(data.id)
-                player = new Player(null, socket, room.players.size % 2 === 1)
-                room.players.set(player.id, player)
-
-                roomId = data.id
-
-                sendRoomInfo()
-
-                break
-
-            case "createRoom":
-                if (rooms.has(data.id)) {
-                    socket.send(
-                        JSON.stringify({
-                            msg: "error",
-                            error: "There's already a room with that id",
-                        })
-                    )
-
-                    return
-                }
-
-                rooms.set(data.id, new Room())
                 room = rooms.get(data.id)
                 player = new Player(null, socket, room.players.size % 2 === 1)
                 room.players.set(player.id, player)
