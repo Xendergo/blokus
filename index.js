@@ -15,7 +15,7 @@ const app = express()
 
 app.use("/", express.static(__dirname + "/public"))
 app.use("/license", express.static(__dirname + "/LICENSE.txt"))
-app.use("/source", express.static(__dirname + "/source.zip"))
+app.use("/source", express.static(__dirname + "/source.7z"))
 
 const port = 4000
 const server = app.listen(port)
