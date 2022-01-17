@@ -120,6 +120,10 @@ wsServer.on("connection", socket => {
     })
 })
 
+/**
+ * Send me the feedback and other stuff
+ * @param {*} socket
+ */
 async function sendAdminData(socket) {
     socket.send(
         JSON.stringify({
