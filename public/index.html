@@ -2,14 +2,28 @@
 
 <html xml:lang>
     <head>
+        <meta charset="utf-8" />
+        <meta
+            name="description"
+            content="Play blokus with your friends online"
+        />
+        <meta name="keywords" content="board game, game, blokus" />
+
         <title>Blokus</title>
         <link href="style.css" rel="stylesheet" type="text/css" />
     </head>
 
     <body>
         <div id="roomChoice">
+            <h1>Blokus</h1>
+            Play blokus online with your friends<br /><br /><br />
+
+            The room ID can be anything as long as it's unique, and everyone
+            enters the same one<br /><br />
             <input type="text" placeholder="room id" id="room-id" />
-            <button onclick="joinRoom()">Join room</button>
+            <button onclick="joinRoom()">Join room</button><br />
+            <a href="source"><button>💾</button></a>
+            <a href="license"><button>⚖️</button></a>
         </div>
 
         <div id="colorChoice" hidden></div>

@@ -18,8 +18,10 @@ const __dirname = dirname(__filename)
 const app = express()
 
 app.use("/", express.static(__dirname + "/public"))
+app.use("/license", express.static(__dirname + "/LICENSE.txt"))
+app.use("/source", express.static(__dirname + "/source.zip"))
 
-const port = 3000
+const port = 4000
 const server = app.listen(port)
 console.log("Listening on port " + port)
 

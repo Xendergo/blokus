@@ -1,58 +1,62 @@
 * {
-  background-color: black;
-  font-size: 1.5rem;
-  color: white;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: black;
+    font-size: 1.2rem;
+    color: white;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 button,
 input {
-  background-color: transparent;
-  border: 2px solid white;
-  padding: 8px;
-  margin: 8px;
-  border-radius: 4px;
-  transition-duration: 0.2s;
+    background-color: transparent;
+    border: 2px solid white;
+    padding: 8px;
+    margin: 8px;
+    border-radius: 4px;
+    transition-duration: 0.2s;
 }
 
 button:hover {
-  cursor: pointer;
-  background-color: rgba(0, 83, 161, 0.685);
+    cursor: pointer;
+    background-color: rgba(0, 83, 161, 0.685);
 }
 
 .tile {
-  width: 3vh;
-  height: 3vh;
-  border: 2px solid black;
-  display: inline-block;
-  background-color: #303030;
+    width: 3vh;
+    height: 3vh;
+    border: 2px solid black;
+    display: inline-block;
+    background-color: #303030;
 }
 
 .gameWrapper {
-  display: flex;
-  align-items: flex-start;
+    display: flex;
+    align-items: flex-start;
 }
 
 .flex {
-  display: flex;
+    display: flex;
 }
 
 .flex-column {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 @keyframes tileChanged {
-  0% {
-    filter: invert(100%) blur(8px);
-  }
+    0% {
+        filter: invert(100%) blur(8px);
+    }
 
-  100% {
-    filter: none;
-  }
+    100% {
+        filter: none;
+    }
 }
 
 .board {
-  display: grid;
-  grid-gap: 1px;
+    display: grid;
+    grid-gap: 1px;
+}
+
+#roomChoice {
+    text-align: center;
 }
