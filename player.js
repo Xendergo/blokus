@@ -29,29 +29,94 @@ export class Player {
         this.firstMove = true
     }
 
+    generatePlacedPolyminoMsg(index, x, y, transformation, color) {
+        return {
+            msg: "placedPolymino",
+            index: index,
+            x: x,
+            y: this.flipped ? 20 - y - Math.sqrt(polyminos[index].length) : y,
+            transformation: this.flipped
+                ? transformationMap.get(
+                      composeTransformation(
+                          transformations[transformation],
+                          verticalFlip
+                      )
+                  )
+                : transformation,
+            color: color,
+        }
+    }
+
     /**
      * Tell the player that someone placed a polymino
      * @param {*} msg
      */
     sendPlacedPolymino(msg) {
-        const newMsg = {
-            msg: "placedPolymino",
-            index: msg.index,
-            x: msg.x,
-            y: this.flipped
-                ? 20 - msg.y - Math.sqrt(polyminos[msg.index].length)
-                : msg.y,
-            transformation: this.flipped
-                ? transformationMap.get(
-                      composeTransformation(
-                          transformations[msg.transformation],
-                          verticalFlip
-                      )
-                  )
-                : msg.transformation,
-            color: msg.color,
+        this.socket.send(
+            JSON.stringify(
+                this.generatePlacedPolyminoMsg(
+                    msg.index,
+                    msg.x,
+                    msg.y,
+                    msg.transformation,
+                    msg.color
+                )
+            )
+        )
+    }
+
+    sendRoomInfo(room) {
+        this.socket.send(
+            JSON.stringify({
+                msg: "JoinedRoom",
+            })
+        )
+
+        this.socket.send(
+            JSON.stringify({
+                msg: "colors",
+                colors: room.availableColors(),
+            })
+        )
+    }
+
+    colorChosen(color, room) {
+        this.color = color
+
+        for (const otherPlayer of room.players.values()) {
+            if (otherPlayer.color === null) {
+                otherPlayer.socket.send(
+                    JSON.stringify({
+                        msg: "colors",
+                        colors: room.availableColors(),
+                    })
+                )
+            }
         }
 
-        this.socket.send(JSON.stringify(newMsg))
+        room.boardChanges.forEach(change => {
+            this.sendPlacedPolymino(change)
+        })
+
+        this.socket.send(
+            JSON.stringify({
+                msg: "availablePolyminos",
+                polyminos: room.availablePieces[color],
+            })
+        )
+    }
+
+    placedPolymino(room, index, x, y, transformation) {
+        const msg = this.generatePlacedPolyminoMsg(
+            index,
+            x,
+            y,
+            transformation,
+            this.color
+        )
+
+        const polymino = transformations[msg.transformation](polyminos[index])
+
+        room.placePolymino(msg, polymino, this.firstMove)
     }
 }

@@ -60,27 +60,6 @@ wsServer.on("connection", socket => {
         }
     })
 
-    function sendRoomInfo() {
-        socket.send(
-            JSON.stringify({
-                msg: "JoinedRoom",
-            })
-        )
-
-        socket.send(
-            JSON.stringify({
-                msg: "colors",
-                colors: room.colors.filter(
-                    c =>
-                        !Array.from(room.players.values()).reduce(
-                            (a, v) => a || v.color === c,
-                            false
-                        )
-                ),
-            })
-        )
-    }
-
     socket.on("message", dataJson => {
         const data = JSON.parse(dataJson)
         switch (data.msg) {
@@ -95,95 +74,24 @@ wsServer.on("connection", socket => {
 
                 roomId = data.id
 
-                sendRoomInfo()
+                player.sendRoomInfo(room)
 
                 break
 
             case "color":
                 if (!room) return
-
-                player.color = data.color
-
-                for (const otherPlayer of room.players.values()) {
-                    if (otherPlayer.color === null) {
-                        otherPlayer.socket.send(
-                            JSON.stringify({
-                                msg: "colors",
-                                colors: room.colors.filter(
-                                    c =>
-                                        !Array.from(
-                                            room.players.values()
-                                        ).reduce(
-                                            (a, v) => a || v.color === c,
-                                            false
-                                        )
-                                ),
-                            })
-                        )
-                    }
-                }
-
-                room.boardChanges.forEach(change => {
-                    player.sendPlacedPolymino(change)
-                })
-
-                socket.send(
-                    JSON.stringify({
-                        msg: "availablePolyminos",
-                        polyminos: room.availablePieces[data.color],
-                    })
-                )
-
+                player.colorChosen(data.color, room)
                 break
 
             case "placedPolymino":
                 if (!room) return
-
-                const msg = {
-                    msg: "placedPolymino",
-                    index: data.index,
-                    x: data.x,
-                    y: player.flipped
-                        ? 20 - data.y - Math.sqrt(polyminos[data.index].length)
-                        : data.y,
-                    transformation: player.flipped
-                        ? transformationMap.get(
-                              composeTransformation(
-                                  transformations[data.transformation],
-                                  verticalFlip
-                              )
-                          )
-                        : data.transformation,
-                    color: player.color,
-                }
-
-                const polymino = transformations[msg.transformation](
-                    polyminos[msg.index]
+                player.placedPolymino(
+                    room,
+                    data.index,
+                    data.x,
+                    data.y,
+                    data.transformation
                 )
-
-                if (
-                    !room.isValidPosition(
-                        msg.x,
-                        msg.y,
-                        polymino,
-                        msg.color,
-                        player.firstMove
-                    )
-                )
-                    return
-
-                player.firstMove = false
-
-                room.availablePieces[msg.color][msg.index] = false
-
-                room.boardChanges.push(msg)
-
-                room.placePolymino(msg.x, msg.y, polymino, msg.color)
-
-                Array.from(room.players.values()).forEach(otherPlayer => {
-                    if (otherPlayer.color !== null)
-                        otherPlayer.sendPlacedPolymino(msg)
-                })
         }
     })
 })
