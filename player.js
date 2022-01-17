@@ -6,6 +6,9 @@ import {
     transformationMap,
 } from "./public/polyminoTransformations.js"
 
+/**
+ * Generate a sequence of IDs
+ */
 function* generateIdFunc() {
     let currentId = 0n
 
@@ -26,6 +29,10 @@ export class Player {
         this.firstMove = true
     }
 
+    /**
+     * Tell the player that someone placed a polymino
+     * @param {*} msg
+     */
     sendPlacedPolymino(msg) {
         const newMsg = {
             msg: "placedPolymino",

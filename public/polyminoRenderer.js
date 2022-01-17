@@ -7,6 +7,9 @@ import {
     changeSelectedPolymino,
 } from "./sketch.js"
 
+/**
+ * Draw the list of polyminos next to the board
+ */
 export function showPolyminos() {
     document.querySelectorAll("#polyminos *")?.forEach(elt => elt.remove())
 

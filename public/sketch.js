@@ -31,6 +31,10 @@ const names = ["red", "green", "blue", "yellow"]
 
 export let selectedPolymino = 0
 
+/**
+ * Change which polymino the user currently has selected
+ * @param {number} polymino The index of the polymino
+ */
 export function changeSelectedPolymino(polymino) {
     selectedPolymino = polymino
     showPolyminos()
@@ -43,11 +47,18 @@ export let inGame = false
 
 const snap = new Audio("snap.mp3")
 
+/**
+ * Called when the server says the player has joined the room
+ */
 export function onJoinRoom() {
     document.querySelector("#roomChoice").hidden = true
     document.querySelector("#colorChoice").hidden = false
 }
 
+/**
+ * Change which colors the player can choose
+ * @param {number[]} availableColors Which colors are available
+ */
 export function onReceiveColors(availableColors) {
     if (playerColor !== undefined) return
 
@@ -63,6 +74,14 @@ export function onReceiveColors(availableColors) {
     }
 }
 
+/**
+ * Place a polymino on the board
+ * @param {number} polyminoTransformation Which transformation to use
+ * @param {number} index The polymino's index
+ * @param {number} x The polymino's x position
+ * @param {number} y The polymino's y position
+ * @param {number} color The polymino's color
+ */
 export function onPolyminoPlaced(polyminoTransformation, index, x, y, color) {
     let polymino = transformations[polyminoTransformation](polyminos[index])
     let size = Math.sqrt(polymino.length)
@@ -76,11 +95,16 @@ export function onPolyminoPlaced(polyminoTransformation, index, x, y, color) {
     }
 
     snap.play()
+
     document.querySelector(
         "#mostRecentColor"
     ).innerHTML = `Most recent color: ${names[color]}`
 }
 
+/**
+ * Which polyminos the player has available, necessary for when users reload and rejoin
+ * @param {boolean[]} newAvailablePolyminos
+ */
 export function onReceiveAvailablePolyminos(newAvailablePolyminos) {
     if (newAvailablePolyminos.includes(false)) {
         setAvailablePolyminos(newAvailablePolyminos)
@@ -97,6 +121,10 @@ let hoverY = null
  */
 export let playerColor
 
+/**
+ * Tell the server the player chose a color, and show the game board
+ * @param {number} choice The color choice
+ */
 function colorChoice(choice) {
     playerColor = choice
 
@@ -137,6 +165,12 @@ function colorChoice(choice) {
     showPolyminos()
 }
 
+/**
+ * Set the color of a square on the game board
+ * @param {number} x X position
+ * @param {number} y Y position
+ * @param {number} color Color
+ */
 function setBoardSpot(x, y, color) {
     board[x][y] = color
     boardElts[x][y].style.backgroundColor = colors[color]
@@ -145,6 +179,9 @@ function setBoardSpot(x, y, color) {
     previewStatusChanged()
 }
 
+/**
+ * Set the colors of the squares on the game board, neccesary to reset the board to redraw any overlays
+ */
 function rerenderBoard() {
     for (let x = 0; x < 20; x++) {
         for (let y = 0; y < 20; y++) {
@@ -158,6 +195,11 @@ function rerenderBoard() {
     }
 }
 
+/**
+ * When the player clicks a square on the board
+ * @param {number} clickX X position
+ * @param {number} clickY Y position
+ */
 function onClick(clickX, clickY) {
     const polymino = transformation(polyminos[selectedPolymino])
     const size = Math.sqrt(polymino.length)
@@ -187,12 +229,20 @@ function onClick(clickX, clickY) {
     showPolyminos()
 }
 
+/**
+ * When a player hovers over a square on the board
+ * @param {number} x X position
+ * @param {number} y Y position
+ */
 function onHover(x, y) {
     hoverX = x
     hoverY = y
     previewStatusChanged()
 }
 
+/**
+ * When the preview of where a polymino would be placed should change
+ */
 export function previewStatusChanged() {
     if (hoverX === null || hoverY === null) return
 
@@ -234,6 +284,10 @@ export function previewStatusChanged() {
     }
 }
 
+/**
+ * The transformation applied to polyminos the player is placing
+ * @type {(polymino: number[]) => number[]}
+ */
 export let transformation = noTransformation
 
 document.addEventListener("keypress", e => {
@@ -250,6 +304,10 @@ document.addEventListener("keypress", e => {
     }
 })
 
+/**
+ * Apply a transformation to polyminos a player is placing
+ * @param {(polymino: number[]) => number[]} nextTransformation The transformation to apply
+ */
 function transformAll(nextTransformation) {
     transformation = composeTransformation(transformation, nextTransformation)
 

@@ -1,4 +1,7 @@
 /*
+Use group theory to efficiently transform polyminos
+
+Source:
 https://www.cs.umb.edu/~eb/d4/index.html
 
 Square symmetry group:
@@ -13,6 +16,11 @@ Diagonal flip 1: 6
 Diagonal flip 2: 7
 */
 
+/**
+ * Transform a polymino by mapping the coordinates of each position to a new position using a mapping function
+ * @param {(x: number, y: number, size: number) => [number, number]} f
+ * @returns {(polymino: number[]) => number[]}
+ */
 function transformation(f) {
     return polymino => {
         const size = Math.sqrt(polymino.length)
@@ -52,8 +60,14 @@ export const diagonalFlip1 = transformation((x, y, size) => [
 
 export const diagonalFlip2 = transformation((x, y, size) => [y, x])
 
+/**
+ * Map transformation to id
+ */
 export const transformationMap = new Map()
 
+/**
+ * Map id to transformation
+ */
 export const transformations = [
     noTransformation,
     rotation90Deg,
@@ -80,6 +94,13 @@ const compositionTable = [
     [7, 5, 6, 4, 3, 1, 2, 0],
 ]
 
+/**
+ * Compose two transformations into one new transformation, not commutative
+ *
+ * @param {number} first ID of the first transformation
+ * @param {number} second ID of the second transformation
+ * @returns {number} ID of the composed transformation
+ */
 export function composeTransformation(first, second) {
     let firstIndex = transformationMap.get(first)
     let secondIndex = transformationMap.get(second)

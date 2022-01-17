@@ -14,6 +14,13 @@ export class Room {
             .map(() => new Array(21).fill(0).map(() => true))
     }
 
+    /**
+     * Place a polymino on the board, neccesary for checking move validity
+     * @param {*} x X position
+     * @param {*} y Y position
+     * @param {*} polymino The polymino to place
+     * @param {*} color The polymino's color
+     */
     placePolymino(x, y, polymino, color) {
         let size = Math.sqrt(polymino.length)
 
@@ -26,6 +33,15 @@ export class Room {
         }
     }
 
+    /**
+     * Check if a move is valid
+     * @param {number} x X position
+     * @param {number} y Y position
+     * @param {number[]} polymino Which polymino to use
+     * @param {number} playerColor The polymino's color
+     * @param {boolean} firstMove If this is the player's first move
+     * @returns {boolean}
+     */
     isValidPosition(x, y, polymino, playerColor, firstMove) {
         return isValidPosition(
             this.board,

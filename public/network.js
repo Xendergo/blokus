@@ -50,6 +50,9 @@ ws.onmessage = msg => {
     }
 }
 
+/**
+ * Tell the server you want to join a room
+ */
 function joinRoom() {
     ws.send(
         JSON.stringify({
@@ -61,6 +64,10 @@ function joinRoom() {
 
 window.joinRoom = joinRoom
 
+/**
+ * Tell the server the player chose a color
+ * @param {number} choice
+ */
 export function sendColorChoice(choice) {
     ws.send(
         JSON.stringify({
@@ -70,6 +77,12 @@ export function sendColorChoice(choice) {
     )
 }
 
+/**
+ * Tell the server the player placed a polymino
+ * @param {number} selectedPolymino The index of the polymino the player placed
+ * @param {number} cornerX X position
+ * @param {number} cornerY Y position
+ */
 export function sendPlacedPolymino(selectedPolymino, cornerX, cornerY) {
     ws.send(
         JSON.stringify({
