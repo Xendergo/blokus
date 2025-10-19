@@ -76,3 +76,4 @@ typings/
 .fusebox/
 
 Tor-Service/
+.direnv
